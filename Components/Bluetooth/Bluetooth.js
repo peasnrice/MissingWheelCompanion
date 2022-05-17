@@ -25,6 +25,8 @@ const reducer = (
     }
   };
 
+var deviceUUID = "";
+
 const BluetoothScreen = () => {
 
 	// reducer to store and display detected ble devices
@@ -44,11 +46,29 @@ const BluetoothScreen = () => {
         }
   
         // if a device is detected add the device to the list by dispatching the action into the reducer
-        if (scannedDevice) {
-          dispatch({ type: 'ADD_DEVICE', payload: scannedDevice });
-          console.log(scannedDevice);
+        if (scannedDevice.serviceUUIDs) {
+            deviceUUID = scannedDevice.serviceUUIDs[0].split("-");
+            if(deviceUUID[0].includes("180d")){
+                dispatch({ type: 'ADD_DEVICE', payload: scannedDevice });
+                console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                console.log("Heart rate Monitor Detected!");
+                console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                console.log("ID:" + scannedDevice.id);
+                console.log("is Connectable:" + scannedDevice.isConnectable);
+                console.log("local Name:" + scannedDevice.localName);
+                console.log("manufacturer Data:" + scannedDevice.manufacturerData);
+                console.log("mtu:" + scannedDevice.mtu);
+                console.log("name:" + scannedDevice.name);
+                console.log("overflowServiceUUIds:" + scannedDevice.overflowServiceUUIDs);
+                console.log("rssi:" + scannedDevice.rssi);
+                console.log("Service Data:" + scannedDevice.serviceData);
+                console.log("service uuids:" + scannedDevice.serviceUUIDs);
+                console.log("solicitedServiceUUIDs:" + scannedDevice.solicitedServiceUUIDs);
+                console.log("tx PowerLevel: " + scannedDevice.txPowerLevel);
+        
+            }
         }
-      });
+    });
   
       // stop scanning devices after 5 seconds
       setTimeout(() => {
