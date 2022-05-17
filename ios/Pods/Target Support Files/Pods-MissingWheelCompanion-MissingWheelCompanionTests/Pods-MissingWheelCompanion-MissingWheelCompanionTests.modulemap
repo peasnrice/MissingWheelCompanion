@@ -1,0 +1,6 @@
+module Pods_MissingWheelCompanion_MissingWheelCompanionTests {
+  umbrella header "Pods-MissingWheelCompanion-MissingWheelCompanionTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
