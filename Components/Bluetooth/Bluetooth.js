@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { View, StyleSheet, Text, SafeAreaView, Button, ActivityIndicator } from 'react-native';
 import { BleManager, Device } from 'react-native-ble-plx';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { Buffer } from "buffer";
 const manager = new BleManager();
 
 const reducer = (
@@ -26,6 +27,7 @@ const reducer = (
   };
 
 var deviceUUID = "";
+// var componeentUUID = "0x2A37"
 
 const BluetoothScreen = () => {
 
@@ -38,34 +40,60 @@ const BluetoothScreen = () => {
     const scanDevices = () => {
       // display the Activityindicator
       setIsLoading(true);
-  
+      console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+      console.log("Scanning for BLE devices");
+      console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
       // scan devices
       manager.startDeviceScan(null, null, (error, scannedDevice) => {
         if (error) {
           console.warn(error);
         }
-  
         // if a device is detected add the device to the list by dispatching the action into the reducer
         if (scannedDevice.serviceUUIDs) {
             deviceUUID = scannedDevice.serviceUUIDs[0].split("-");
             if(deviceUUID[0].includes("180d")){
-                dispatch({ type: 'ADD_DEVICE', payload: scannedDevice });
+              dispatch({ type: 'ADD_DEVICE', payload: scannedDevice });
+              console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+              console.log("Heart rate Monitor Detected!");
+              console.log(scannedDevice.serviceUUIDs);
+              console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+              console.log("ID:" + scannedDevice.id);
+              console.log("is Connectable:" + scannedDevice.isConnectable);
+              console.log("local Name:" + scannedDevice.localName);
+              console.log("manufacturer Data:" + scannedDevice.manufacturerData);
+              console.log("mtu:" + scannedDevice.mtu);
+              console.log("name:" + scannedDevice.name);
+              console.log("overflowServiceUUIds:" + scannedDevice.overflowServiceUUIDs);
+              console.log("rssi:" + scannedDevice.rssi);
+              console.log("Service Data:" + scannedDevice.serviceData);
+              console.log("service uuids:" + scannedDevice.serviceUUIDs);
+              console.log("solicitedService UUIDs:" + scannedDevice.solicitedServiceUUIDs);
+              console.log("tx PowerLevel: " + scannedDevice.txPowerLevel);
+              //get characteristics using promises, then retrieve heart rate.
+
+              manager.connectToDevice(scannedDevice.id)
+              .then(device => {
                 console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                console.log("Heart rate Monitor Detected!");
+                console.log(`Connected successfully to ${device.name} !`);
+                console.log("Discovering available characteristics");
                 console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                console.log("ID:" + scannedDevice.id);
-                console.log("is Connectable:" + scannedDevice.isConnectable);
-                console.log("local Name:" + scannedDevice.localName);
-                console.log("manufacturer Data:" + scannedDevice.manufacturerData);
-                console.log("mtu:" + scannedDevice.mtu);
-                console.log("name:" + scannedDevice.name);
-                console.log("overflowServiceUUIds:" + scannedDevice.overflowServiceUUIDs);
-                console.log("rssi:" + scannedDevice.rssi);
-                console.log("Service Data:" + scannedDevice.serviceData);
-                console.log("service uuids:" + scannedDevice.serviceUUIDs);
-                console.log("solicitedServiceUUIDs:" + scannedDevice.solicitedServiceUUIDs);
-                console.log("tx PowerLevel: " + scannedDevice.txPowerLevel);
-        
+                return device.discoverAllServicesAndCharacteristics()
+              .then(device => {
+                device.monitorCharacteristicForService(
+                  "0000180d-0000-1000-8000-00805f9b34fb", 
+                  "00002a37-0000-1000-8000-00805f9b34fb",
+                  (error, characteristic) => {
+                    if (error)
+                    {
+                      console.warn(error);
+                    }
+                    const readValueInRawBytes = Buffer.from(characteristic.value, 'base64');
+                    console.log(readValueInRawBytes[1]);
+                  }        
+                )
+                })
+              })
+              .catch(err => console.log('ERROR ON CONNECTION =', err));
             }
         }
     });
