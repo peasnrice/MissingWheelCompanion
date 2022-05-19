@@ -1,9 +1,11 @@
 import React, {useReducer} from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, SafeAreaView, Button, ActivityIndicator } from 'react-native';
 import { BleManager, Device } from 'react-native-ble-plx';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Buffer } from "buffer";
+import { io } from "socket.io-client";
+
 import splitLayoutProps from 'react-native/Libraries/StyleSheet/splitLayoutProps';
 const manager = new BleManager();
 
@@ -39,12 +41,32 @@ const DisplayHRBPM = (props) => {
 const BluetoothScreen = () => {
 	// reducer to store and display detected ble devices
     const [scannedDevices, dispatch] = useReducer(reducer, []);
+    const [socket, setSocket] = useState(null);
+
+    // socket.on("connect", () => {
+    //   console.log("socket ID: " + socket.id); // x8WIv7-mJelg7on_ALbx
+    // });
+
+    // socket.on("disconnect", () => {
+    //   console.log("socket ID: " + socket.id); // undefined
+    // });
+
+    useEffect(() => {
+      const newSocket = io.connect("http://192.168.1.208:3000");
+      setSocket(newSocket);
+      return () => newSocket.close();
+    }, [setSocket]);
+
 
     // state to give the user a feedback about the manager scanning devices
     const [isLoading, setIsLoading] = useState(false);
     const [heartRateInBPM, setHeartRateInBPM] = useState(0);
   
     const scanDevices = () => {
+
+      console.log(socket);
+
+
       // display the Activityindicator
       setIsLoading(true);
       console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -95,7 +117,8 @@ const BluetoothScreen = () => {
                       console.warn(error);
                     }
                     const readValueInRawBytes = Buffer.from(characteristic.value, 'base64');
-                    setHeartRateInBPM(readValueInRawBytes[1]);
+                    setHeartRateInBPM(readValueInRawBytes[1]);   
+                    socket.emit("chat message", readValueInRawBytes[1])
                   }        
                 )
                 })
