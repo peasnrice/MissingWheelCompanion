@@ -4,6 +4,7 @@ import { View, StyleSheet, Text, SafeAreaView, Button, ActivityIndicator } from 
 import { BleManager, Device } from 'react-native-ble-plx';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Buffer } from "buffer";
+import splitLayoutProps from 'react-native/Libraries/StyleSheet/splitLayoutProps';
 const manager = new BleManager();
 
 const reducer = (
@@ -29,13 +30,19 @@ const reducer = (
 var deviceUUID = "";
 // var componeentUUID = "0x2A37"
 
-const BluetoothScreen = () => {
+const DisplayHRBPM = (props) => {
+  return (
+      <Text style={styles.sectionTitle}>{props.heartRate}</Text>
+  )
+}
 
+const BluetoothScreen = () => {
 	// reducer to store and display detected ble devices
     const [scannedDevices, dispatch] = useReducer(reducer, []);
 
     // state to give the user a feedback about the manager scanning devices
     const [isLoading, setIsLoading] = useState(false);
+    const [heartRateInBPM, setHeartRateInBPM] = useState(0);
   
     const scanDevices = () => {
       // display the Activityindicator
@@ -88,7 +95,7 @@ const BluetoothScreen = () => {
                       console.warn(error);
                     }
                     const readValueInRawBytes = Buffer.from(characteristic.value, 'base64');
-                    console.log(readValueInRawBytes[1]);
+                    setHeartRateInBPM(readValueInRawBytes[1]);
                   }        
                 )
                 })
@@ -119,6 +126,7 @@ const BluetoothScreen = () => {
                     ) : (
                     <Button title="Scan devices" onPress={scanDevices} />
                 )}
+                <DisplayHRBPM heartRate={heartRateInBPM}/>
             </View>
             </View>
         </SafeAreaView>
@@ -128,7 +136,8 @@ const BluetoothScreen = () => {
 
 const styles = StyleSheet.create({
   body: {
-    backgroundColor: Colors.red
+    backgroundColor: Colors.red,
+    color: Colors.white
   },
   sectionContainer: {
     marginTop: 32,
@@ -137,7 +146,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 24,
     fontWeight: '600',
-    color: Colors.black,
+    color: Colors.white,
   },
   
 });
