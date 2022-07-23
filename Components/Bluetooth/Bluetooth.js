@@ -58,17 +58,17 @@ function reducer( devices, action) {
 var deviceUUID = "";
 // var componeentUUID = "0x2A37"
 
-const DisplayHRBPM = (props) => {
-  return (
-      <Text style={styles.sectionTitle}>Heart Rate (BPM): {props.heartRate}</Text>
-  )
-}
+// const DisplayHRBPM = (props) => {
+//   return (
+//       <Text style={styles.sectionTitle}>Heart Rate (BPM): {props.heartRate}</Text>
+//   )
+// }
 
-const DisplayPower = (props) => {
-  return (
-      <Text style={styles.sectionTitle}>Power(Watts): {props.powerOutput}</Text>
-  )
-}
+// const DisplayPower = (props) => {
+//   return (
+//       <Text style={styles.sectionTitle}>Power(Watts): {props.powerOutput}</Text>
+//   )
+// }
 
 const BluetoothScreen = () => {
 	// reducer to store and display detected ble devices
@@ -309,16 +309,18 @@ const BluetoothScreen = () => {
             </View>
             
             <View>
-              <Text style={styles.sectionTitle}>Heart rate Monitors!</Text>
-              {devices.filter(device => device.category.includes("HeartRate")).map(device => {
-                  return <HRMonitor key={device.id} device={device} connectToDevice={connectToDevice}/>
-              })}
-              <DisplayHRBPM heartRate={heartRateInBPM}/>
-              <Text style={styles.sectionTitle}>Bike Trainers!</Text>
-              {devices.filter(device => device.category.includes("BikeTrainer")).map(device => {
-                return <BikeTrainer key={device.id} device={device}/>
-              })}
-              <DisplayPower powerOutput={powerOutput}/>
+              <View style={styles.deviceCategoryContainer}>
+                <Text style={styles.sectionTitle}>Heart Rate Monitors</Text>
+                {devices.filter(device => device.category.includes("HeartRate")).map(device => {
+                    return <HRMonitor key={device.id} device={device} connectToDevice={connectToDevice} heartRate={heartRateInBPM}/>
+                })}
+              </View>
+              <View style={styles.deviceCategoryContainer}>
+                <Text style={styles.sectionTitle}>Bike Trainers</Text>
+                {devices.filter(device => device.category.includes("BikeTrainer")).map(device => {
+                  return <BikeTrainer key={device.id} device={device} power={powerOutput}/>
+                })}
+              </View>
             </View>
         </SafeAreaView>
         
@@ -365,7 +367,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.black,
   },
-  
+  deviceCategoryContainer: {
+    marginTop: 20,
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingTop: 5,
+    backgroundColor: "oldlace",
+    textAlign: 'center',
+    justifyContent: 'center',
+  }
 });
 
 export { BluetoothScreen };
